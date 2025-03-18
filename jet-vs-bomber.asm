@@ -16,6 +16,16 @@ JetXPos         byte    ; player-0 x-position
 JetYPos         byte    ; player-0 y-position
 BomberXPos      byte    ; player-1 x-position
 BomberYPos      byte    ; player-1 y-position
+JetSpritePtr    word    ; pointer to player0 sprite lookup table
+JetColorPtr     word    ; pointer to player0 color lookup table 
+BomberSpritePtr word    ; pointer to player1 sprite lookup table
+BomberColorPtr  word    ; pointer to player1 color lookup table
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Declare constants
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+JET_HEIGHT = 8          ; player0 sprite height (# rows in lookup table)
+BOMBER_HEIGHT = 9       ; player1 sprite height (# rows in lookup table)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Start our ROM code at memory address $F000
@@ -33,6 +43,34 @@ Reset:
     sta JetYPos         ; JetYPos = 10
     lda #60
     sta JetXPos         ; JetXPos = 60
+    lda #83
+    sta BomberYPos      ; BomberYPos = 83
+    lda #54
+    sta BomberXPos      ; BomberXPos = 54
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Initialize the pointer to the correct lookup table adresses 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    lda #<JetSprite
+    sta JetSpritePtr        ; lo-byte pointer for jet sprite lookup table
+    lda #>JetSprite
+    sta JetSpritePtr+1      ; hi-byte pionter for jet sprite lookup table
+
+    lda #<JetColor
+    sta JetColorPtr         ; lo-byte pointer for jet color lookup table 
+    lda #>JetColor
+    sta JetColorPtr+1       ; hi-byte pointer for jet color lookup table 
+    
+    lda #<BomberSprite
+    sta BomberSpritePtr     ; lo-byte pointer for bomber sprite lookup table
+    lda #>BomberSprite
+    sta BomberSpritePtr+1   ; hi-byte pionter for bomber sprite lookup table
+
+    lda #<BomberColor
+    sta BomberColorPtr      ; lo-byte pointer for bomber color lookup table 
+    lda #>BomberColor
+    sta BomberColorPtr+1    ; hi-byte pointer for bomber color lookup table 
+    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Start the main display loop and frame rendering 
@@ -136,7 +174,8 @@ BomberSprite
         .byte #%00010000    ;...#....
         .byte #%00111000    ;..###...
 
-JetColorFrame
+JetColor
+        .byte #$00
         .byte #$04
         .byte #$04
         .byte #$04
@@ -144,8 +183,8 @@ JetColorFrame
         .byte #$06
         .byte #$08
         .byte #$08
-        .byte #$08
-BomberColorFrame
+BomberColor
+        .byte #$00
         .byte #$D4
         .byte #$D2
         .byte #$D2
