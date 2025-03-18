@@ -94,7 +94,7 @@ StartFrame:
     sta VBLANK          ; turn off VBLANK
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Display the 192 visible scanlines of our main game
+; Display the 96 visible scanlines of our main game (because 2-line kernal)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GameVisibleLine:
     lda #$84
@@ -110,9 +110,42 @@ GameVisibleLine:
     lda #0
     sta PF2             ; set PF2 bit pattern
 
-    ldx #192            ; x counts the number of remaining scanlines
+    ldx #96             ; x counts the number of remaining scanlines
 .GameLineLoop:
-    sta WSYNC
+.AreWeInsideJetSprite:
+    txa                 ; transfer X to A
+    sec                 ; make sure carry flag is set before subtraction
+    sbc JetYPos         ; subtract sprite Y-coordinate
+    cmp JET_HEIGHT      ; are we inside the sprite height bounds?
+    bcc .DrawSpriteP0   ; if result < SpriteHeight, call the draw routine
+    lda #0              ; else, set the lookup index to zero
+.DrawSpriteP0: 
+    tay                     ; load Y so we can work with the pointer
+    lda (JetSpritePtr),Y    ; load player0 bitmap data from lookup table
+    sta WSYNC               ; wait for scanline
+    sta GRP0                ; set graphics for player0
+    lda (JetColorPtr),Y     ; load player color from lookup table
+    sta COLUP0              ; set color of player0 
+
+.AreWeInsideBomberSprite:
+    txa                 ; transfer X to A
+    sec                 ; make sure carry flag is set before subtraction
+    sbc BomberYPos      ; subtract sprite Y-coordinate
+    cmp BOMBER_HEIGHT      ; are we inside the sprite height bounds?
+    bcc .DrawSpriteP1   ; if result < SpriteHeight, call the draw routine
+    lda #0              ; else, set the lookup index to zero
+.DrawSpriteP1: 
+    tay                     ; load Y so we can work with the pointer
+
+    lda #%00000101          ; max stretch
+    sta NUSIZ1              ; stretch player 1 sprite
+
+    lda (BomberSpritePtr),Y ; load player1 bitmap data from lookup table
+    sta WSYNC               ; wait for scanline
+    sta GRP1                ; set graphics for player1
+    lda (BomberColorPtr),Y  ; load player color from lookup table
+    sta COLUP1              ; set color of player1 
+
     dex                 ; x--
     bne .GameLineLoop   ; repeat next main game scanline until finished
 
