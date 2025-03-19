@@ -221,6 +221,22 @@ CheckP0Right:
 NoInput:                ; fallback when no input was performed
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Calclation to update the position of bomber for next frame
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+UpdateBomberPosition:
+    lda BomberYPos
+    clc
+    cmp #0                      ; compare bomber y position with zero
+    bmi .ResetBomberPosition    ; if it is < zero then rest y position to the top
+    dec BomberYPos              ; else, decrement eny y positon for next frame
+    jmp EndPositionUpdate       ; skip reset
+.ResetBomberPosition:
+    lda #96
+    sta BomberYPos
+                        ; TODO: set bomber X position to random number
+EndPositionUpdate:      ; fallback for the position update code
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     jmp StartFrame      ; continue to display the next frame
