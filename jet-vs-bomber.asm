@@ -114,7 +114,7 @@ StartFrame:
 GameVisibleLine:
     lda #$84
     sta COLUBK          ; set background / river color to blue
-    lda #$C2
+    lda #$F0
     sta COLUPF          ; set playfield / grass color to green
     lda #%00000001
     sta CTRLPF          ; enable playfield to be reflected, rather than repeated
