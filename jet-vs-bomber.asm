@@ -21,6 +21,7 @@ JetColorPtr     word    ; pointer to player0 color lookup table
 BomberSpritePtr word    ; pointer to player1 sprite lookup table
 BomberColorPtr  word    ; pointer to player1 color lookup table
 JetAnimOffSet   byte    ; player0 sprite offset for animation
+Random          byte    ; radom number generate to set enemy position 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -48,6 +49,9 @@ Reset:
     sta BomberYPos      ; BomberYPos = 83
     lda #54
     sta BomberXPos      ; BomberXPos = 54
+
+    lda #%11010100
+    sta Random          ; Random = $D4
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Initialize the pointer to the correct lookup table adresses 
@@ -231,10 +235,9 @@ UpdateBomberPosition:
     dec BomberYPos              ; else, decrement eny y positon for next frame
     jmp EndPositionUpdate       ; skip reset
 .ResetBomberPosition:
-    lda #96
-    sta BomberYPos
-                        ; TODO: set bomber X position to random number
-EndPositionUpdate:      ; fallback for the position update code
+    jsr GetRandomBomberPos      ; call subroutine for next random x position
+                        
+EndPositionUpdate:              ; fallback for the position update code
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
@@ -260,6 +263,36 @@ SetObjectXPos subroutine
     asl                      ; four shift lefts to get only the top 4 bits
     sta HMP0,Y               ; store the fine offset to the correct HMxx
     sta RESP0,Y              ; fix object position in 15-step increment
+    rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Subroutine to generate a linear-feedback shift registar random number.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Generate a LFSR random number
+; Diveide the random number by 4 to limit the size of the result to match river.
+; Add 30 to compensate for the left green playfield. Bomber stays over river.
+; Update Y Postion.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GetRandomBomberPos subroutine
+    lda Random
+    asl
+    eor Random
+    eor Random
+    asl
+    asl
+    eor Random
+    asl
+    rol Random              ; performs a series of shifts and bit operations
+
+    lsr
+    lsr                     ; divide value by 4 with the 2 right shifts
+    sta BomberXPos          ; save it to the variable BomberXPos
+    lda #30
+    adc BomberXPos          ; adds 30 + BomberXPos for left PF
+    sta BomberXPos          ; sets the new value to the bomber x position
+
+    lda #96
+    sta BomberYPos          ; reset Y position of bomber
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
