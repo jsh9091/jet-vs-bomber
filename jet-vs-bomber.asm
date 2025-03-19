@@ -20,6 +20,7 @@ JetSpritePtr    word    ; pointer to player0 sprite lookup table
 JetColorPtr     word    ; pointer to player0 color lookup table 
 BomberSpritePtr word    ; pointer to player1 sprite lookup table
 BomberColorPtr  word    ; pointer to player1 color lookup table
+JetAnimOffSet   byte    ; player0 sprite offset for animation
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -134,6 +135,9 @@ GameVisibleLine:
     bcc .DrawSpriteP0   ; if result < SpriteHeight, call the draw routine
     lda #0              ; else, set the lookup index to zero
 .DrawSpriteP0: 
+    clc                     ; clear carry flag before addition
+    adc JetAnimOffSet       ; jump to correct sprite frame address in memory
+
     tay                     ; load Y so we can work with the pointer
     lda (JetSpritePtr),Y    ; load player0 bitmap data from lookup table
     sta WSYNC               ; wait for scanline
@@ -163,6 +167,11 @@ GameVisibleLine:
     dex                 ; x--
     bne .GameLineLoop   ; repeat next main game scanline until finished
 
+    lda #0
+    sta JetAnimOffSet   ; reset sprite animationm to first frame
+
+    sta WSYNC
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Display Overscan
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -182,27 +191,34 @@ CheckP0Up:
     bit SWCHA
     bne CheckP0Down     ; if pattern does not match, bypass Up block
     inc JetYPos
+    lda #0
+    sta JetAnimOffSet   ; reset sprite animationm to first frame
 
 CheckP0Down:
     lda #%00100000      ; player0 joystick down
     bit SWCHA
     bne CheckP0Left
     dec JetYPos
+    lda #0
+    sta JetAnimOffSet   ; reset sprite animationm to first frame
 
 CheckP0Left:
     lda #%01000000      ; player0 joystick left
     bit SWCHA
     bne CheckP0Right
     dec JetXPos
+    lda #16             ; JET_HEIGHT x 2 - TODO: re-write without magic number
+    sta JetAnimOffSet   ; set animation offset to the second frame
 
 CheckP0Right:
     lda #%10000000      ; player0 joystick right
     bit SWCHA
     bne NoInput
     inc JetXPos
+    lda JET_HEIGHT      ; 8
+    sta JetAnimOffSet   ; set animation offset to the second frame
 
-NoInput:
-    ; fallback when no input was performed
+NoInput:                ; fallback when no input was performed
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
@@ -273,6 +289,25 @@ BomberSprite
         .byte #%00111000    ;..###...
 
 JetColor
+        .byte #$06;
+        .byte #$06;
+        .byte #$02;
+        .byte #$04;
+        .byte #$06;
+        .byte #$08;
+        .byte #$08;
+        .byte #$0A;
+
+JetColorLeftTurn
+        .byte #$06;
+        .byte #$06;
+        .byte #$02;
+        .byte #$04;
+        .byte #$06;
+        .byte #$08;
+        .byte #$08;
+        .byte #$0A;
+JetColorRightTurn
         .byte #$06;
         .byte #$06;
         .byte #$02;
