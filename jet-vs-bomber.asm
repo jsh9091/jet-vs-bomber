@@ -170,7 +170,7 @@ GameVisibleLine:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 JetSprite
         .byte #%00000000    ;........
-        .byte #%00111000    ;..###...
+        .byte #%00101000    ;..#.#...
         .byte #%00010000    ;...#....
         .byte #%11111110    ;#######.
         .byte #%01111100    ;.#####..
@@ -208,14 +208,14 @@ BomberSprite
         .byte #%00111000    ;..###...
 
 JetColor
-        .byte #$00
-        .byte #$04
-        .byte #$04
-        .byte #$04
-        .byte #$06
-        .byte #$06
-        .byte #$08
-        .byte #$08
+        .byte #$06;
+        .byte #$06;
+        .byte #$02;
+        .byte #$04;
+        .byte #$06;
+        .byte #$08;
+        .byte #$08;
+        .byte #$0A;
 BomberColor
         .byte #$00
         .byte #$D4
