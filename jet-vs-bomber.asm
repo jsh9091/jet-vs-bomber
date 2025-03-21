@@ -337,8 +337,21 @@ UpdateBomberPosition:
     dec BomberYPos              ; else, decrement eny y positon for next frame
     jmp EndPositionUpdate       ; skip reset
 .ResetBomberPosition:
-    inc Score                   ; Score++
-    inc Timer                   ; Timer++
+
+.SetScoreValues: 
+    sed                         ; set decimal mode for score and timer values
+    
+    lda Score 
+    clc 
+    adc #1
+    sta Score                   ; add 1 to the score (BDC does not like INC)
+    
+    lda Timer
+    clc
+    adc #1
+    sta Timer                   ; add 1 to the timer (BDC does not like INC)
+
+    cld                         ; disable decimal mode after updating score and timer
     jsr GetRandomBomberPos      ; call subroutine for next random x position
                         
 EndPositionUpdate:              ; fallback for the position update code
