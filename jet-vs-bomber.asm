@@ -29,6 +29,8 @@ JetAnimOffSet   byte    ; player0 sprite offset for animation
 Random          byte    ; radom number generate to set enemy position 
 ScoreSprite     byte    ; store the sprite bit pattern for the score
 TimerSprite     byte    ; store the sprite bit pattern for the timer
+TerrainColor    byte    ; store the color of the terrain
+RiverColor      byte    ; store the color of the river
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -130,13 +132,19 @@ StartFrame:
 ; Display the scoreboard lines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda #0
+    sta COLUBK
     sta PF0
     sta PF1
     sta PF2
     sta GRP0
-    sta GRP1            ; reset TIA resgisters before displaying the score
+    sta GRP1
+    sta CTRLPF
+    sta COLUBK              ; reset TIA resgisters before displaying the score
 
-    ldx #DIGITS_HEIGHT  ; start X counter with 5 (height of digits)
+    lda #$1E
+    sta COLUPF              ; set the scoreboard color
+
+    ldx #DIGITS_HEIGHT      ; start X counter with 5 (height of digits)
 
 .ScoreDigitLoop:
     ldy TensDigitOffset     ; get the tens digit offset for the Score
@@ -184,14 +192,24 @@ StartFrame:
 
     sta WSYNC  
 
+    lda #0
+    sta PF0
+    sta PF1
+    sta PF2
+    sta WSYNC  
+    sta WSYNC  
+    sta WSYNC  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Display the 96 visible scanlines of our main game (because 2-line kernal)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GameVisibleLine:
-    lda #$84
-    sta COLUBK          ; set background / river color to blue
-    lda #$F0
-    sta COLUPF          ; set playfield / grass color to green
+    lda TerrainColor
+    sta COLUPF          ; set the terrain background color
+
+    lda RiverColor
+    sta COLUBK          ; set the river background color
+
     lda #%00000001
     sta CTRLPF          ; enable playfield to be reflected, rather than repeated
     lda #$F0            
@@ -201,7 +219,7 @@ GameVisibleLine:
     lda #0
     sta PF2             ; set PF2 bit pattern
 
-    ldx #84             ; x counts the number of remaining scanlines
+    ldx #85             ; x counts the number of remaining scanlines
 .GameLineLoop:
 .AreWeInsideJetSprite:
     txa                 ; transfer X to A
@@ -317,17 +335,10 @@ EndPositionUpdate:              ; fallback for the position update code
 CheckCollisionP0P1:
     lda #%10000000              ; CXPPMM bit 7 detects P0 and P1 collision
     bit CXPPMM                  ; check CXPPMM bit 7 with above pattern
-    bne .CollisionP0P1          ; if collision between P0 and P1 happened
-    jmp CheckCollisionP0PF      ; else, skip to next check 
-.CollisionP0P1:
-    jsr GameOver                ; call GameOver subroutine
-
-CheckCollisionP0PF:
-    lda  #%10000000             ; CXP0FB bit 7 detects P0 and P1 collision
-    bit CXP0FB                  ; check if CXP0FB bit 7 with the pattern above
-    bne .CollisionP0PF          ; if collision P0 and PF happened
-    jmp EndCollisionCheck       ; else, skip to the end
-.CollisionP0PF:
+    bne .P0P1Collided          ; if collision between P0 and P1 happened
+    jsr SetTerrainRiverColor    ; else, set playfield color 
+    jmp EndCollisionCheck      ; else, skip to next check 
+.P0P1Collided:
     jsr GameOver                ; call GameOver subroutine
 
 EndCollisionCheck:              ; fallback 
@@ -336,7 +347,17 @@ EndCollisionCheck:              ; fallback
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    jmp StartFrame      ; continue to display the next frame
+    jmp StartFrame          ; continue to display the next frame
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Set the colors for the terrain and river 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SetTerrainRiverColor subroutine
+    lda #$F0
+    sta TerrainColor        ; set color of ground to brown
+    lda #$84
+    sta RiverColor          ; set river to blue
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Subroutine to handle object horizontal position with fine offset
@@ -363,8 +384,12 @@ SetObjectXPos subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GameOver subroutine
     lda #$30
-    sta COLUBK
+    sta TerrainColor        ; set terrian color to red
+    sta RiverColor          ; set river color to red
 
+    lda #0
+    sta Score               ; Score = 0
+    
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
