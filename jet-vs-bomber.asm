@@ -307,7 +307,7 @@ CheckP0Left:
     bit SWCHA
     bne CheckP0Right    
     lda JetXPos
-    cmp #35             ; if (player 0 X position < 5)
+    cmp #35             ; if (player 0 X position < 35)
     bmi CheckP0Right    ;  then, skip decrement
     dec JetXPos         ;  else, decrement
     lda #16             ; JET_HEIGHT x 2 - TODO: re-write without magic number
@@ -318,7 +318,7 @@ CheckP0Right:
     bit SWCHA
     bne NoInput
     lda JetXPos
-    cmp #102            ; if (player 0 X position > 100)
+    cmp #102            ; if (player 0 X position > 102)
     bpl NoInput         ;  then, skip increment 
     inc JetXPos         ;  else, incremnt X
     lda JET_HEIGHT      ; 8
