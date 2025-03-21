@@ -325,6 +325,8 @@ UpdateBomberPosition:
     dec BomberYPos              ; else, decrement eny y positon for next frame
     jmp EndPositionUpdate       ; skip reset
 .ResetBomberPosition:
+    inc Score                   ; Score++
+    inc Timer                   ; Timer++
     jsr GetRandomBomberPos      ; call subroutine for next random x position
                         
 EndPositionUpdate:              ; fallback for the position update code
