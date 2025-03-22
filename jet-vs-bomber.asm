@@ -120,7 +120,7 @@ StartFrame:
     REPEND
     lda #0
     sta VSYNC           ; turn off VSYNC
-    REPEAT 33
+    REPEAT 32
         sta WSYNC       ; display the recommended lines of VBLANK
     REPEND
 
@@ -141,11 +141,13 @@ StartFrame:
 
     jsr CalculateDigitOffset    ; calculate the scoreboard digit lookup table offset
 
+    jsr GenerateJetSound        ; configure and enable our jet engine aduio
+
     sta WSYNC
     sta HMOVE                   ; apply the horizontal offsets previously set
 
     lda #0
-    sta VBLANK          ; turn off VBLANK
+    sta VBLANK                  ; turn off VBLANK
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Display the scoreboard lines
@@ -418,7 +420,30 @@ EndCollisionCheck:              ; fallback
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    jmp StartFrame          ; continue to display the next frame
+    jmp StartFrame              ; continue to display the next frame
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Generate audio for jet engine sound based on the jet y-position
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GenerateJetSound subroutine
+    lda #1
+    sta AUDV0                   ; load value to volume register
+
+    lda JetYPos
+    lsr
+    lsr
+    lsr                         ; left shift right = divide by 8
+    sta Temp
+
+    lda #31                     ; max value for AUDF0
+    sec
+    sbc Temp                    ; subtract 31-(Y/8) change sounnd based on Y position of jet
+    sta AUDF0                   ; set value for audio frequence/pitch register
+
+    lda #8
+    sta AUDC0                   ; set value for audio tone type register
+
+    rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Set the colors for the terrain and river 
