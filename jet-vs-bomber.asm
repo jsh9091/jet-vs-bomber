@@ -414,6 +414,7 @@ CheckCollisionM0P1:
     cld
     lda #0
     sta MisseleYPos             ; reset the missile position
+    jsr GenerateBomberHitSound
 
 EndCollisionCheck:              ; fallback 
     sta CXCLR                   ; clear all collision flags before the next frame
@@ -461,6 +462,20 @@ GenerateMissileSound subroutine
 
     rts
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bomber hit by missile
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GenerateBomberHitSound subroutine
+    lda #31
+    sta AUDV0                   ; load value to volume register
+
+    lda #31                     ; 
+    sta AUDF0                   ; set value for audio frequence/pitch register
+
+    lda #31
+    sta AUDC0                   ; set value for audio tone type register
+
+    rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Set the colors for the terrain and river 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
