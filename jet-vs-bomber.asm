@@ -499,7 +499,7 @@ GenerateJetHitSound subroutine
 SetTerrainRiverColor subroutine
     lda #$F0
     sta TerrainColor        ; set color of ground to brown
-    lda #$84
+    lda #$83
     sta RiverColor          ; set river to blue
     rts
 
