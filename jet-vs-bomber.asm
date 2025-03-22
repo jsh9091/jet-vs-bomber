@@ -376,17 +376,10 @@ UpdateBomberPosition:
 
 .SetScoreValues: 
     sed                         ; set decimal mode for score and timer values
-    
-    lda Score 
-    clc 
-    adc #1
-    sta Score                   ; add 1 to the score (BDC does not like INC)
-    
     lda Timer
     clc
     adc #1
     sta Timer                   ; add 1 to the timer (BDC does not like INC)
-
     cld                         ; disable decimal mode after updating score and timer
     jsr GetRandomBomberPos      ; call subroutine for next random x position
                         
@@ -398,11 +391,26 @@ EndPositionUpdate:              ; fallback for the position update code
 CheckCollisionP0P1:
     lda #%10000000              ; CXPPMM bit 7 detects P0 and P1 collision
     bit CXPPMM                  ; check CXPPMM bit 7 with above pattern
-    bne .P0P1Collided          ; if collision between P0 and P1 happened
+    bne .P0P1Collided           ; if collision between P0 and P1 happened
     jsr SetTerrainRiverColor    ; else, set playfield color 
-    jmp EndCollisionCheck      ; else, skip to next check 
+    jmp CheckCollisionM0P1      ; else, skip to next check 
 .P0P1Collided:
     jsr GameOver                ; call GameOver subroutine
+
+CheckCollisionM0P1:
+    lda #%10000000              ; CXM0P bit 7 detects M0 and P1 collision
+    bit CXM0P                   ; check CXM0P register bit 7 wtih above pattern
+    bne .MOP1Collided           ; collision missile 0 player 1 happened
+    jmp EndCollisionCheck       ; else, end checks
+.MOP1Collided:
+    sed 
+    lda Score
+    clc
+    adc #1
+    sta Score                   ; adds 1 to the Score using decimal mode
+    cld
+    lda #0
+    sta MisseleYPos             ; reset the missile position
 
 EndCollisionCheck:              ; fallback 
     sta CXCLR                   ; clear all collision flags before the next frame
