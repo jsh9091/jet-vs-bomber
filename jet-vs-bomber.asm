@@ -398,6 +398,7 @@ CheckCollisionP0P1:
     jsr SetTerrainRiverColor    ; else, set playfield color 
     jmp CheckCollisionM0P1      ; else, skip to next check 
 .P0P1Collided:
+    jsr GenerateJetHitSound
     jsr GameOver                ; call GameOver subroutine
 
 CheckCollisionM0P1:
@@ -463,7 +464,7 @@ GenerateMissileSound subroutine
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Bomber hit by missile
+; Bomber hit by missile sound
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GenerateBomberHitSound subroutine
     lda #31
@@ -476,6 +477,22 @@ GenerateBomberHitSound subroutine
     sta AUDC0                   ; set value for audio tone type register
 
     rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Jet hit by bomber sound
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GenerateJetHitSound subroutine
+    lda #31
+    sta AUDV0                   ; load value to volume register
+
+    lda #31                     ; 
+    sta AUDF0                   ; set value for audio frequence/pitch register
+
+    lda #31
+    sta AUDC0                   ; set value for audio tone type register
+
+    rts
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Set the colors for the terrain and river 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
