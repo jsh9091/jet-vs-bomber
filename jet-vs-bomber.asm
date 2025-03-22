@@ -361,6 +361,7 @@ CheckButtonPressed:
     clc
     adc #5
     sta MisseleYPos         ; set missile Y postion = player0 Y
+    jsr GenerateMissileSound
 
 NoInput:                    ; fallback when no input was performed
 
@@ -441,6 +442,21 @@ GenerateJetSound subroutine
     sta AUDF0                   ; set value for audio frequence/pitch register
 
     lda #8
+    sta AUDC0                   ; set value for audio tone type register
+
+    rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Generate audio for jet firing missle
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+GenerateMissileSound subroutine
+    lda #5
+    sta AUDV0                   ; load value to volume register
+
+    lda #31                     ; 
+    sta AUDF0                   ; set value for audio frequence/pitch register
+
+    lda #4
     sta AUDC0                   ; set value for audio tone type register
 
     rts
