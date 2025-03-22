@@ -16,6 +16,8 @@ JetXPos         byte    ; player-0 x-position
 JetYPos         byte    ; player-0 y-position
 BomberXPos      byte    ; player-1 x-position
 BomberYPos      byte    ; player-1 y-position
+MissileXPos     byte    ; missle x-position
+MisseleYPos     byte    ; missle y-position
 Score           byte    ; 2-digit score stored as BCD
 Timer           byte    ; 2-digit timer stored as BCD
 Temp            byte    ; auxiliary vaiable to store temp score values
@@ -65,6 +67,19 @@ Reset:
     sta Score
     sta Timer           ; Score = Timer = 0
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Declare a MARCO to check if we should display the missle 0 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+    MAC DRAW_MISSLE
+        lda #%00000000
+        cpx MisseleYPos     ; compare X (current scanline) with missle Y pos
+        bne .SkipMissleDraw ; if (X != missle Y position), the skip draw
+.DrawMissle:
+        lda #%00000010      ; else, enable missle 0 display
+        inc MisseleYPos     ; increase missile Y pos
+.SkipMissleDraw:
+        sta ENAM0           ; store the correct value in the TIA missle register
+    ENDM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Initialize the pointer to the correct lookup table adresses 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -119,6 +134,10 @@ StartFrame:
     lda BomberXPos
     ldy #1
     jsr SetObjectXPos           ; set player1 horizontal postion
+
+    lda MissileXPos
+    ldy #2
+    jsr SetObjectXPos           ; set missle horizontal postion
 
     jsr CalculateDigitOffset    ; calculate the scoreboard digit lookup table offset
 
@@ -221,6 +240,9 @@ GameVisibleLine:
 
     ldx #85             ; x counts the number of remaining scanlines
 .GameLineLoop:
+    DRAW_MISSLE         ; macro check if we should draw the missle
+
+
 .AreWeInsideJetSprite:
     txa                 ; transfer X to A
     sec                 ; make sure carry flag is set before subtraction
@@ -314,17 +336,31 @@ CheckP0Left:
     sta JetAnimOffSet   ; set animation offset to the second frame
 
 CheckP0Right:
-    lda #%10000000      ; player0 joystick right
+    lda #%10000000          ; player0 joystick right
     bit SWCHA
-    bne NoInput
+    bne CheckButtonPressed
     lda JetXPos
-    cmp #102            ; if (player 0 X position > 102)
-    bpl NoInput         ;  then, skip increment 
-    inc JetXPos         ;  else, incremnt X
-    lda JET_HEIGHT      ; 8
-    sta JetAnimOffSet   ; set animation offset to the second frame
+    cmp #102                ; if (player 0 X position > 102)
+    bpl CheckButtonPressed  ;  then, skip increment 
+    inc JetXPos             ;  else, incremnt X
+    lda JET_HEIGHT          ; 8
+    sta JetAnimOffSet       ; set animation offset to the second frame
 
-NoInput:                ; fallback when no input was performed
+CheckButtonPressed: 
+    lda #%10000000
+    bit INPT4               ; if button is pressed
+    bne NoInput
+.ButtonPressed:
+    lda JetXPos
+    clc
+    adc #4
+    sta MissileXPos         ; set missile X position = player0 X
+    lda JetYPos
+    clc
+    adc #5
+    sta MisseleYPos         ; set missile Y postion = player0 Y
+
+NoInput:                    ; fallback when no input was performed
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Calclation to update the position of bomber for next frame
