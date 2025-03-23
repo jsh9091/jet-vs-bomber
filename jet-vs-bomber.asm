@@ -399,7 +399,7 @@ CheckCollisionP0P1:
     jmp CheckCollisionM0P1      ; else, skip to next check 
 .P0P1Collided:
     jsr GenerateJetHitSound
-    jsr GameOver                ; call GameOver subroutine
+    jsr JetHitByBomber          ; call JetHitByBomber subroutine
 
 CheckCollisionM0P1:
     lda #%10000000              ; CXM0P bit 7 detects M0 and P1 collision
@@ -524,9 +524,9 @@ SetObjectXPos subroutine
     sta RESP0,Y              ; fix object position in 15-step increment
     rts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Game Over subroutine
+; Jet hit by subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-GameOver subroutine
+JetHitByBomber subroutine
     lda #$30
     sta TerrainColor        ; set terrian color to red
     sta RiverColor          ; set river color to red
