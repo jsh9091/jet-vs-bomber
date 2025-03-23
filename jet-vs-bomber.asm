@@ -343,7 +343,8 @@ CheckP0Left:
     cmp #35             ; if (player 0 X position < 35)
     bmi CheckP0Right    ;  then, skip decrement
     dec JetXPos         ;  else, decrement
-    lda #16             ; JET_HEIGHT x 2 - TODO: re-write without magic number
+    lda #JET_HEIGHT     
+    asl                 ; JET_HEIGHT x 2
     sta JetAnimOffSet   ; set animation offset to the second frame
 
 CheckP0Right:
