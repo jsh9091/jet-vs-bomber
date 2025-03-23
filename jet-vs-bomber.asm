@@ -33,6 +33,7 @@ ScoreSprite     byte    ; store the sprite bit pattern for the score
 TimerSprite     byte    ; store the sprite bit pattern for the timer
 TerrainColor    byte    ; store the color of the terrain
 RiverColor      byte    ; store the color of the river
+GameOver        byte    ; 0 if game on, 1 if game over 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -66,6 +67,7 @@ Reset:
     lda #0
     sta Score
     sta Timer           ; Score = Timer = 0
+    sta GameOver        ; 0 = game on, 1 = game over
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare a MARCO to check if we should display the missle 0 
@@ -141,8 +143,15 @@ StartFrame:
 
     jsr CalculateDigitOffset    ; calculate the scoreboard digit lookup table offset
 
-    jsr GenerateJetSound        ; configure and enable our jet engine aduio
+    jsr GenerateJetSound        ; configure and enable our jet engine audio
 
+    lda Timer
+    cmp #$99                    ; timer max value
+    bne .continueGame           ; timer still going, keep playing
+    lda #1
+    sta GameOver                ; set game state to game over
+
+.continueGame
     sta WSYNC
     sta HMOVE                   ; apply the horizontal offsets previously set
 
@@ -349,6 +358,10 @@ CheckP0Right:
     sta JetAnimOffSet       ; set animation offset to the second frame
 
 CheckButtonPressed: 
+    lda GameOver
+    cmp #$0
+    bne NoInput
+
     lda #%10000000
     bit INPT4               ; if button is pressed
     bne NoInput
@@ -369,6 +382,11 @@ NoInput:                    ; fallback when no input was performed
 ; Calclation to update the position of bomber for next frame
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 UpdateBomberPosition:
+
+    lda GameOver
+    cmp #$0
+    bne EndPositionUpdate       ; no position or timer updates if game is over
+
     lda BomberYPos
     clc
     cmp #0                      ; compare bomber y position with zero
@@ -429,6 +447,10 @@ EndCollisionCheck:              ; fallback
 ; Generate audio for jet engine sound based on the jet y-position
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GenerateJetSound subroutine
+    lda GameOver
+    cmp #$0
+    bne .turnOffJetSound        ; no jet sound if game is over 
+
     lda #1
     sta AUDV0                   ; load value to volume register
 
@@ -446,6 +468,15 @@ GenerateJetSound subroutine
     lda #8
     sta AUDC0                   ; set value for audio tone type register
 
+    jmp .endJetSound
+    
+.turnOffJetSound: 
+    lda #0
+    sta AUDV0
+    sta AUDF0
+    sta AUDC0
+
+.endJetSound:
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -497,10 +528,23 @@ GenerateJetHitSound subroutine
 ; Set the colors for the terrain and river 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SetTerrainRiverColor subroutine
+    lda GameOver
+    cmp #$0
+    bne .turnOffRegularTerrainRiverColors
+
     lda #$F0
     sta TerrainColor        ; set color of ground to brown
     lda #$83
     sta RiverColor          ; set river to blue
+    jmp .endTerrainRiverColorUpdate
+
+.turnOffRegularTerrainRiverColors
+    lda #$FC
+    sta TerrainColor        ; set color of ground to brown
+    lda #$8E
+    sta RiverColor          ; set river to blue
+
+.endTerrainRiverColorUpdate:
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
