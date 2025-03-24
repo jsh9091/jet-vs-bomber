@@ -676,7 +676,6 @@ ProcessResetSwitch subroutine
     lsr                         
     bcs .NotReset               ; reset switch was not held
     jmp InitGame                ; start a new game 
-    rts  
 .NotReset:                      ; fallback
     rts
 
