@@ -54,6 +54,7 @@ Reset:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Initialize RAM variables and TIA registers 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+InitGame:
     lda #10
     sta JetYPos         ; JetYPos = 10
     lda #65
@@ -304,7 +305,7 @@ GameVisibleLine:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     lda #2
     sta VBLANK          ; turn on VBLANK again
-    REPEAT 30
+    REPEAT 28
         sta WSYNC       ; display 30 recommended lines of VBLANK Overscan
     REPEND
     lda #0
@@ -438,6 +439,11 @@ CheckCollisionM0P1:
 
 EndCollisionCheck:              ; fallback 
     sta CXCLR                   ; clear all collision flags before the next frame
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check if user hit the reset switch
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+    jsr ProcessResetSwitch
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
@@ -660,6 +666,18 @@ CalculateDigitOffset subroutine
 ; rts takes 6 cycles
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Sleep12Cycles subroutine
+    rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check if user hit the reset switch. If reset, start new game. 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ProcessResetSwitch subroutine
+    lda SWCHB                   ; load in the state of the switches
+    lsr                         
+    bcs .NotReset               ; reset switch was not held
+    jmp InitGame                ; start a new game 
+    rts  
+.NotReset:                      ; fallback
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
