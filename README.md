@@ -5,3 +5,17 @@ Final project for Udemy / Pikuma course: [Learn Assembly Language by Making Game
 Player is a jet fighter plane that must shoot down as many enemy bomber aircraft as possible. For every bomber the jet hits, the score will increase by one. If the bomber ever touches the jet fighter, then the score will reset to zero. The score is displayed in the upper left hand corner of the screen, and a timer is displayed in the upper right hand corner of screen. The game is over when the timer hits 99. The game can be restarted at any time by hitting the Atari reset switch. 
 
 ![Screenshot of Jet vs Bomber game](Screenshot.png)
+
+### Additions from version from online course:
+- Jet and bomber sprites and sprite colors are different from course versions. 
+- Different sprites for jet turning left and jet turning right. 
+- Different colors for terrain and river from online course. 
+- Game ends when timer hits 99. When game is over, the bomber stops coming, the timer stops, background colors change, the jet sound stops, and the jet cannot fire.
+- Game can be restarted at any time by hitting the Atari reset switch. 
+
+
+### Known issues:
+- Severe display issues when tested on Atari Flashback Portable. Can safely assume that game will not work properly on original Atari 2600 hardware.
+
+### Notes:
+- Tested on [Stella](https://stella-emu.github.io/) version 7.0 and [javatari](https://javatari.org/)
