@@ -6,7 +6,7 @@ Player is a jet fighter plane that must shoot down as many enemy bomber aircraft
 
 ![Screenshot of Jet vs Bomber game](Screenshot.png)
 
-### To play
+### To play:
 1. Download *JetVsBomber.bin* file. This file represents the Atari cartridge. 
 2. Open *JetVsBomber.bin* in emulator of your choice. 
 
