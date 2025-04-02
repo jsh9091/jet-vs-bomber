@@ -61,8 +61,8 @@ InitGame:
     sta JetXPos         ; JetXPos = 65
     lda #83
     sta BomberYPos      ; BomberYPos = 83
-    lda #54
-    sta BomberXPos      ; BomberXPos = 54
+    lda #40
+    sta BomberXPos      ; BomberXPos = 40
     lda #%11010100
     sta Random          ; Random = $D4
     lda #0
