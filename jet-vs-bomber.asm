@@ -67,8 +67,10 @@ InitGame:
     sta Random          ; Random = $D4
     lda #0
     sta Score
-    sta Timer           ; Score = Timer = 0
     sta GameOver        ; 0 = game on, 1 = game over
+    lda #$99
+    sta Timer           ; start timer at decimal 99 and count down      
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare a MARCO to check if we should display the missle 0 
@@ -147,7 +149,7 @@ StartFrame:
     jsr GenerateJetSound        ; configure and enable our jet engine audio
 
     lda Timer
-    cmp #$99                    ; timer max value
+    cmp #$0                     ; timer min value
     bne .continueGame           ; timer still going, keep playing
     lda #1
     sta GameOver                ; set game state to game over
@@ -400,8 +402,7 @@ UpdateBomberPosition:
 .SetScoreValues: 
     sed                         ; set decimal mode for score and timer values
     lda Timer
-    clc
-    adc #1
+    sbc #1                      ; subtract one from timer value
     sta Timer                   ; add 1 to the timer (BDC does not like INC)
     cld                         ; disable decimal mode after updating score and timer
     jsr GetRandomBomberPos      ; call subroutine for next random x position
