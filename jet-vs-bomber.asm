@@ -392,7 +392,7 @@ UpdateBomberPosition:
     lda BomberYPos
     clc
     cmp #0                      ; compare bomber y position with zero
-    bmi .ResetBomberPosition    ; if it is < zero then rest y position to the top
+    bmi .ResetBomberPosition    ; if it is < zero then reset y position to the top
     dec BomberYPos              ; else, decrement eny y positon for next frame
     jmp EndPositionUpdate       ; skip reset
 .ResetBomberPosition:
