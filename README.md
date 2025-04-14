@@ -16,7 +16,8 @@ Player is a jet fighter plane that must shoot down as many enemy bomber aircraft
 - Different colors for terrain and river from online course.
 - Timer now counts down from 99 instead of counting up from zero.
 - Game ends when timer hits zero. When game is over, the bomber stops coming, the timer stops, background colors change, the jet sound stops, and the jet cannot fire.
-- Game can be restarted at any time by hitting the Atari reset switch. 
+- Game can be restarted at any time by hitting the Atari reset switch.
+- When bomber hit, it will disappear and a new bomber will appear at top of screen at random location. 
 
 
 ### Known issues:
