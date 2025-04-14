@@ -34,6 +34,7 @@ TimerSprite     byte    ; store the sprite bit pattern for the timer
 TerrainColor    byte    ; store the color of the terrain
 RiverColor      byte    ; store the color of the river
 GameOver        byte    ; 0 if game on, 1 if game over 
+BomberHit       byte    ; 0 if not hit, 1 if hit
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -391,6 +392,10 @@ UpdateBomberPosition:
     cmp #$0
     bne EndPositionUpdate       ; no position or timer updates if game is over
 
+    lda BomberHit
+    cmp #$0
+    bne .ResetBomberPosition
+
     lda BomberYPos
     clc
     cmp #0                      ; compare bomber y position with zero
@@ -406,6 +411,8 @@ UpdateBomberPosition:
     sta Timer                   ; add 1 to the timer (BDC does not like INC)
     cld                         ; disable decimal mode after updating score and timer
     jsr GetRandomBomberPos      ; call subroutine for next random x position
+    lda #0
+    sta BomberHit               ; clear the bomber hit flag
                         
 EndPositionUpdate:              ; fallback for the position update code
 
@@ -437,6 +444,8 @@ CheckCollisionM0P1:
     lda #0
     sta MisseleYPos             ; reset the missile position
     jsr GenerateBomberHitSound
+    lda #1
+    sta BomberHit               ; mark the bomber as hit
 
 EndCollisionCheck:              ; fallback 
     sta CXCLR                   ; clear all collision flags before the next frame
