@@ -35,6 +35,7 @@ TerrainColor    byte    ; store the color of the terrain
 RiverColor      byte    ; store the color of the river
 GameOver        byte    ; 0 if game on, 1 if game over 
 BomberHit       byte    ; 0 if not hit, 1 if hit
+HardMode        byte    ; 0 if easy mode, 1 if hard
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Declare constants
@@ -451,9 +452,10 @@ EndCollisionCheck:              ; fallback
     sta CXCLR                   ; clear all collision flags before the next frame
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Check if user hit the reset switch
+; Check console switches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
     jsr ProcessResetSwitch
+    jsr ProcessLeftDifficultySwitch
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Loop back to start a brand new frame
@@ -683,10 +685,25 @@ Sleep12Cycles subroutine
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ProcessResetSwitch subroutine
     lda SWCHB                   ; load in the state of the switches
-    lsr                         
+    lsr
     bcs .NotReset               ; reset switch was not held
     jmp InitGame                ; start a new game 
 .NotReset:                      ; fallback
+    rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check if left P0 difficulty switch set to hard. 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ProcessLeftDifficultySwitch subroutine
+    lda SWCHB                   ; load in the state of the switches
+    asl                         ; left difficulty value in D7
+    bpl .setHardMode
+    lda #0
+    sta HardMode                ; set easy mode
+    rts
+.setHardMode:
+    lda #1
+    sta HardMode                ; set mode as hard
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
