@@ -697,13 +697,13 @@ ProcessResetSwitch subroutine
 ProcessLeftDifficultySwitch subroutine
     lda SWCHB                   ; load in the state of the switches
     asl                         ; left difficulty value in D7
-    bpl .setHardMode
-    lda #0
-    sta HardMode                ; set easy mode
-    rts
-.setHardMode:
+    bpl .setEasyMode
     lda #1
     sta HardMode                ; set mode as hard
+    rts
+.setEasyMode:
+    lda #0
+    sta HardMode                ; set mode as easy
     rts
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
