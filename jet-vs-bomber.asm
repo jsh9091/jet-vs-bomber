@@ -405,12 +405,12 @@ UpdateBomberPosition:
     jmp EndPositionUpdate       ; skip reset
 .ResetBomberPosition:
 
-.SetScoreValues: 
-    sed                         ; set decimal mode for score and timer values
+.SetTimerValues: 
+    sed                         ; set decimal mode for timer values
     lda Timer
     sbc #1                      ; subtract one from timer value
     sta Timer                   ; add 1 to the timer (BDC does not like INC)
-    cld                         ; disable decimal mode after updating score and timer
+    cld                         ; disable decimal mode after updating timer
     jsr GetRandomBomberPos      ; call subroutine for next random x position
     lda #0
     sta BomberHit               ; clear the bomber hit flag
